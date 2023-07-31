@@ -28,7 +28,7 @@ export type proxyOptions = {
   autoRewrite?: boolean;
   protocolRewrite?: any;
   followRedirects?: boolean;
-  handleErrors?: boolean
+  handleErrors?: boolean;
 };
 
 /**
@@ -78,7 +78,7 @@ export function createProxyServer(options: proxyOptions): ProxyServer {
   if (!options) throw new Error("options are required!");
   const proxy = new ProxyServer(options);
   if (options.handleErrors) {
-    proxy.on('error', (err, _req, res: ServerResponse) => {
+    proxy.on("error", (err, _req, res: ServerResponse) => {
       if (!res.headersSent) {
         res.writeHead(502, { "content-type": "text/plain" });
         res.end("Bad Gateway");

@@ -121,7 +121,12 @@ export default {
     clb
   ) {
     // And we begin!
-    server.emit("start", downstreamReq, downstreamRes, options.target || options.forward);
+    server.emit(
+      "start",
+      downstreamReq,
+      downstreamRes,
+      options.target || options.forward
+    );
 
     // @ts-ignore
     const agents: {
@@ -139,7 +144,9 @@ export default {
       // If forward enable, so just pipe the request
       var forwardReq = (
         options.forward.protocol === "https:" ? https : http
-      ).request(setupOutgoing(requestOptions, options, downstreamReq, "forward"));
+      ).request(
+        setupOutgoing(requestOptions, options, downstreamReq, "forward")
+      );
 
       // error handler (e.g. ECONNRESET, ECONNREFUSED)
       // Handle errors on incoming request as well as it makes sense to
@@ -162,7 +169,13 @@ export default {
     // Enable developers to modify the upstreamReq before headers are sent
     upstreamReq.on("socket", function (socket) {
       if (server && !upstreamReq.getHeader("expect")) {
-        server.emit("upstreamReq", upstreamReq, downstreamReq, downstreamRes, options);
+        server.emit(
+          "upstreamReq",
+          upstreamReq,
+          downstreamReq,
+          downstreamRes,
+          options
+        );
       }
     });
 
@@ -186,7 +199,7 @@ export default {
     downstreamReq.on("error", proxyError);
     upstreamReq.on("error", proxyError);
 
-    function proxyError(err) {      
+    function proxyError(err) {
       const url = options.target || options.forward;
       // downstream request was already destroyed.
       if (downstreamReq.socket.destroyed && err.code === "ECONNRESET") {
@@ -205,13 +218,21 @@ export default {
 
     upstreamReq.on("response", function forwardResponse(upstreamRes) {
       upstreamRes.on("error", proxyError);
+
       if (server) {
         server.emit("upstreamRes", upstreamRes, downstreamReq, downstreamRes);
       }
       if (!downstreamRes.headersSent && !options.selfHandleResponse) {
         for (var i = 0; i < webOutgoingPasses.length; i++) {
-          // @ts-ignore - can return boolean
-          if (webOutgoingPasses[i](downstreamReq, downstreamRes, upstreamRes, options)) {
+          if (
+            // @ts-ignore - can return boolean
+            webOutgoingPasses[i](
+              downstreamReq,
+              downstreamRes,
+              upstreamRes,
+              options
+            )
+          ) {
             break;
           }
         }
@@ -220,14 +241,16 @@ export default {
       if (!downstreamRes.writableEnded) {
         // Allow us to listen when the proxy has completed
         upstreamRes.on("end", function () {
-          if (server) server.emit("end", downstreamReq, downstreamRes, upstreamRes);
+          if (server)
+            server.emit("end", downstreamReq, downstreamRes, upstreamRes);
         });
         // We pipe to the response unless its expected to be handled by the user
         // https://nodejs.org/api/stream.html#readablepipedestination-options
         if (!options.selfHandleResponse) upstreamRes.pipe(downstreamRes);
       } else {
         upstreamRes.destroy();
-        if (server) server.emit("end", downstreamReq, downstreamRes, upstreamRes);
+        if (server)
+          server.emit("end", downstreamReq, downstreamRes, upstreamRes);
       }
     });
   },
