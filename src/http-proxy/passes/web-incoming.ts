@@ -198,7 +198,9 @@ export default {
     // handle errors in proxy and incoming request, just like for forward proxy
     downstreamReq.on("error", proxyError);
     upstreamReq.on("error", proxyError);
-
+    upstreamReq.on("error", () => {
+      upstreamReq.destroy();
+    });
     function proxyError(err) {
       const url = options.target || options.forward;
       // downstream request was already destroyed.

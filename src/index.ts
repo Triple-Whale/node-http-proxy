@@ -83,7 +83,7 @@ export function createProxyServer(options: proxyOptions): ProxyServer {
         res.writeHead(502, { "content-type": "text/plain" });
         res.end("Bad Gateway");
       } else {
-        req.destroy();
+        res.destroy();
       }
     });
   }

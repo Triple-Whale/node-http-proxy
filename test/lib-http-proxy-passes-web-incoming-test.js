@@ -305,23 +305,24 @@ describe('#createProxyServer.web() using own http server', function () {
       };
     }
 
-    proxy.on('upstreamReq', function(upstreamReq, req, res, options) {
-      console.log('reess');
+    proxy.on('upstreamReq', function(upstreamReq) {
       total ++
+      upstreamReq.on('close', () => {
+        maybe_done('upstreamReq close');
+      })
+      upstreamReq.emit('error', {code: 'dd'})
       upstreamReq.on("response", function (upstreamRes) {
         total ++
         upstreamRes.on('close', () => {
           maybe_done('upstreamRes close');
         })
       });
-      upstreamReq.on('close', () => {
-        maybe_done('upstreamReq close');
-      })
+
     });
 
      const source =  http.createServer(function(req, res) {
       setTimeout(() => {
-        // res.destroy();
+        res.destroy();
         res.end('ok');
       }, 1000);
       // res.destroy();
@@ -344,7 +345,6 @@ describe('#createProxyServer.web() using own http server', function () {
 
     function requestHandler(req, res) {
       total += 2
-      console.log('requestHandler');
       req.on('close', () => {
         maybe_done('req close');
       })
@@ -366,7 +366,7 @@ describe('#createProxyServer.web() using own http server', function () {
       method: 'GET',
     }, function() {}).end()
     setTimeout(() => {
-      req.destroy();
+      // req.destroy();
     } , 400);
     req.on('error', (err) => {
     }
