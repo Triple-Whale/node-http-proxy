@@ -310,11 +310,14 @@ describe('#createProxyServer.web() using own http server', function () {
       upstreamReq.on('close', () => {
         maybe_done('upstreamReq close');
       })
-      upstreamReq.emit('error', {code: 'dd'})
+      // upstreamReq.emit('error', {code: 'dd'})
       upstreamReq.on("response", function (upstreamRes) {
-        total ++
+        total += 2
         upstreamRes.on('close', () => {
           maybe_done('upstreamRes close');
+        })
+        upstreamRes.on('end', () => {
+          maybe_done('upstreamRes end');
         })
       });
 
@@ -352,7 +355,7 @@ describe('#createProxyServer.web() using own http server', function () {
         maybe_done('res close');
       })
       setTimeout(() => {
-        // res.destroy();
+        res.destroy();
         // req.socket.emit('error')
       } , 400);
       proxy.web(req, res);

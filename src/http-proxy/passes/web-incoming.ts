@@ -219,6 +219,9 @@ export default {
     (options.buffer || downstreamReq).pipe(upstreamReq);
 
     upstreamReq.on("response", function forwardResponse(upstreamRes) {
+      upstreamRes.on("error", () => {
+        upstreamRes.emit("end");
+      });
       upstreamRes.on("error", proxyError);
 
       if (server) {
@@ -250,6 +253,7 @@ export default {
         // https://nodejs.org/api/stream.html#readablepipedestination-options
         if (!options.selfHandleResponse) upstreamRes.pipe(downstreamRes);
       } else {
+        upstreamRes.emit("end");
         upstreamRes.destroy();
         if (server)
           server.emit("end", downstreamReq, downstreamRes, upstreamRes);
