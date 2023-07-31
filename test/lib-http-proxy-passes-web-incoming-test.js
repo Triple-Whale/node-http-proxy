@@ -322,7 +322,7 @@ describe('#createProxyServer.web() using own http server', function () {
 
      const source =  http.createServer(function(req, res) {
       setTimeout(() => {
-        res.destroy();
+        // res.destroy();
         res.end('ok');
       }, 1000);
       // res.destroy();
