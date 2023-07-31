@@ -297,24 +297,15 @@ describe('#createProxyServer.web() using own http server', function () {
 
     proxy.on('upstreamReq', function(upstreamReq, req, res, options) {
       upstreamReq.on("response", function (upstreamRes) {
-        console.log('up response');
         upstreamRes.on('end', () => {
-          console.log('up res end');
         })
         upstreamRes.on('close', () => {
-          console.log('up res close');
-        done();
-
         })
         upstreamRes.on('error', () => {
-          console.log('up res error');
         })
       });
       upstreamReq.on('close', () => {
-        console.log('up req close');
       })
-      console.log('upstreamReq');
-      // upstreamReq.setHeader('X-Special-Proxy-Header', 'foobar');
     });
 
      const source =  http.createServer(function(req, res) {
@@ -341,23 +332,13 @@ describe('#createProxyServer.web() using own http server', function () {
     });
 
     function requestHandler(req, res) {
-      // proxy.once('error', function (err, errReq, errRes) {
-      //   proxyServer.close();
-      //   expect(err).to.be.an(Error);
-      //   expect(errReq).to.be.equal(req);
-      //   expect(errRes).to.be.equal(res);
-      //   expect(new Date().getTime() - started).to.be.greaterThan(99);
-      //   expect(err.code).to.be('ECONNRESET');
-      //   done();
-      // });
-      // setTimeout(() => {
-      //   req.socket.emit('error', new Error('test'));
-      // }, 200);
+
       req.on('close', () => {
         console.log('down req close');
       })
       res.on('close', () => {
         console.log('down res close');
+        done();
 
       })
       res.on('finish', () => {
@@ -377,7 +358,6 @@ describe('#createProxyServer.web() using own http server', function () {
       // req.destroy();
     } , 400);
     req.on('error', (err) => {
-      // logger.error('req error', err);
     }
     );
   });

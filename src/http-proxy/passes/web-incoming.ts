@@ -204,10 +204,10 @@ export default {
     (options.buffer || downstreamReq).pipe(upstreamReq);
 
     upstreamReq.on("response", function forwardResponse(upstreamRes) {
+      upstreamRes.on("error", proxyError);
       if (server) {
         server.emit("upstreamRes", upstreamRes, downstreamReq, downstreamRes);
       }
-
       if (!downstreamRes.headersSent && !options.selfHandleResponse) {
         for (var i = 0; i < webOutgoingPasses.length; i++) {
           // @ts-ignore - can return boolean
