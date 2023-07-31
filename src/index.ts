@@ -79,7 +79,6 @@ export function createProxyServer(options: proxyOptions): ProxyServer {
   const proxy = new ProxyServer(options);
   if (options.handleErrors) {
     proxy.on('error', (err, _req, res: ServerResponse) => {
-      console.error('errr',err);
       if (!res.headersSent) {
         res.writeHead(502, { "content-type": "text/plain" });
         res.end("Bad Gateway");

@@ -188,7 +188,7 @@ export default {
 
     function proxyError(err) {      
       const url = options.target || options.forward;
-      // incoming request was already destroyed.
+      // downstream request was already destroyed.
       if (downstreamReq.socket.destroyed && err.code === "ECONNRESET") {
         server.emit("econnreset", err, downstreamReq, downstreamRes, url);
         return upstreamReq.destroy();
@@ -226,7 +226,7 @@ export default {
         // https://nodejs.org/api/stream.html#readablepipedestination-options
         if (!options.selfHandleResponse) upstreamRes.pipe(downstreamRes);
       } else {
-        upstreamRes.resume();
+        upstreamRes.destroy();
         if (server) server.emit("end", downstreamReq, downstreamRes, upstreamRes);
       }
     });
