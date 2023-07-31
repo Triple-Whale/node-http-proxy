@@ -1,6 +1,6 @@
 {
   "name": "@tw/http-proxy",
-  "version": "1.23.2",
+  "version": "1.23.3",
   "scripts": {
     "dev": "tsc --watch --preserveWatchOutput",
     "build": "npm i && tsc",
