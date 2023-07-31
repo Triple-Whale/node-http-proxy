@@ -291,42 +291,47 @@ describe('#createProxyServer.web() using own http server', function () {
   it('response should end', function(done) {
     var proxy = httpProxy.createProxyServer({
       target: 'http://127.0.0.1:45002',
-      handleErrors: true
+      handleErrors: true,
+      // timeout: 400
     });
     let count = 0;
-    let total = 2
-    function maybe_done() {
+    let total = 0
+    function maybe_done(name) {
       count ++
-      if (count => total) {
+      console.log('maybe_done', count, total, name);
+      if (count >= total) {
+        console.log('done');
         done()
       };
     }
 
     proxy.on('upstreamReq', function(upstreamReq, req, res, options) {
-      total = 4
+      console.log('reess');
+      total ++
       upstreamReq.on("response", function (upstreamRes) {
-
+        total ++
         upstreamRes.on('close', () => {
-          maybe_done();
+          maybe_done('upstreamRes close');
         })
       });
       upstreamReq.on('close', () => {
-        maybe_done();
+        maybe_done('upstreamReq close');
       })
     });
 
      const source =  http.createServer(function(req, res) {
       setTimeout(() => {
-        res.destroy();
+        // res.destroy();
         res.end('ok');
       }, 1000);
-      // res.write('ok');
+      // res.destroy();
+      res.write('ok');
     }).listen(45002);
 
  
     source.on('clientError', (err, socket) => {
       console.log('clientError', err);
-      // socket.destroy();
+      socket.destroy();
     });
 
     var proxyServer = http.createServer(requestHandler);
@@ -334,19 +339,22 @@ describe('#createProxyServer.web() using own http server', function () {
 
     proxyServer.on('clientError', (err, socket) => {
       console.log('clientError', err);
-      // socket.destroy();
+      socket.destroy();
     });
 
     function requestHandler(req, res) {
-
+      total += 2
+      console.log('requestHandler');
       req.on('close', () => {
-        maybe_done();
-        console.log('down req close');
+        maybe_done('req close');
       })
       res.on('close', () => {
-        maybe_done();
-        console.log('down res close');
+        maybe_done('res close');
       })
+      setTimeout(() => {
+        // res.destroy();
+        // req.socket.emit('error')
+      } , 400);
       proxy.web(req, res);
     }
 
@@ -356,7 +364,7 @@ describe('#createProxyServer.web() using own http server', function () {
       hostname: '127.0.0.1',
       port: '8010',
       method: 'GET',
-    }, function() {}).end();
+    }, function() {}).end()
     setTimeout(() => {
       req.destroy();
     } , 400);
