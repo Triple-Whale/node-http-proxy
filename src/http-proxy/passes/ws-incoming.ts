@@ -108,9 +108,9 @@ export default {
 
     if (head && head.length) socket.unshift(head);
 
-    var upstreamReq = (isSSL.test(options.target.protocol) ? https : http).request(
-      setupOutgoing(options.ssl || {}, options, req)
-    );
+    var upstreamReq = (
+      isSSL.test(options.target.protocol) ? https : http
+    ).request(setupOutgoing(options.ssl || {}, options, req));
 
     // Enable developers to modify the upstreamReq before headers are sent
     if (server) {
@@ -162,7 +162,10 @@ export default {
       // Also handles when a header is an array
       //
       socket.write(
-        createHttpHeader("HTTP/1.1 101 Switching Protocols", upstreamRes.headers)
+        createHttpHeader(
+          "HTTP/1.1 101 Switching Protocols",
+          upstreamRes.headers
+        )
       );
 
       proxySocket.pipe(socket).pipe(proxySocket);
@@ -181,6 +184,6 @@ export default {
       }
       socket.end();
     }
-  return upstreamReq;
+    return upstreamReq;
   },
 };

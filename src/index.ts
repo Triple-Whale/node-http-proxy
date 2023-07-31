@@ -13,22 +13,26 @@ export type proxyOptions = {
   agent?: Agent;
   buffer?: any;
   selfHandleResponse?: boolean;
-  ssl?: any;
+  ssl?: {
+    key: string;
+    cert: string;
+  };
   ws?: boolean;
   xfwd?: boolean;
   secure?: boolean;
   toProxy?: boolean;
   prependPath?: boolean;
   ignorePath?: boolean;
-  localAddress?: any;
+  localAddress?: string;
   changeOrigin?: boolean;
   preserveHeaderKeyCase?: boolean;
   auth?: string;
-  hostRewrite?: any;
+  hostRewrite?: boolean;
   autoRewrite?: boolean;
-  protocolRewrite?: any;
+  protocolRewrite?: boolean;
   followRedirects?: boolean;
   handleErrors?: boolean;
+  logger?: any;
 };
 
 /**
@@ -78,7 +82,10 @@ export function createProxyServer(options: proxyOptions): ProxyServer {
   if (!options) throw new Error("options are required!");
   const proxy = new ProxyServer(options);
   if (options.handleErrors) {
-    proxy.on("error", (_err, req, res: ServerResponse) => {
+    proxy.on("error", (_err, _req, res: ServerResponse) => {
+      if (options.logger) {
+        options.logger.error(_err);
+      }
       if (!res.headersSent) {
         res.writeHead(502, { "content-type": "text/plain" });
         res.end("Bad Gateway");
