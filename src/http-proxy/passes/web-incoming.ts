@@ -167,7 +167,7 @@ export default {
     ).request(setupOutgoing(requestOptions, options, downstreamReq));
 
     // Enable developers to modify the upstreamReq before headers are sent
-    upstreamReq.on("socket", function (socket) {
+    upstreamReq.on("socket", (_socket) => {
       if (server && !upstreamReq.getHeader("expect")) {
         server.emit(
           "upstreamReq",
@@ -188,7 +188,7 @@ export default {
     }
 
     // ensure we destroy proxy if request is aborted
-    downstreamRes.on("close", function () {
+    downstreamRes.on("close", () => {
       var aborted = !downstreamRes.writableFinished;
       if (aborted) {
         upstreamReq.destroy();
@@ -242,7 +242,7 @@ export default {
 
       if (!downstreamRes.writableEnded) {
         // Allow us to listen when the proxy has completed
-        upstreamRes.on("end", function () {
+        upstreamRes.on("end", () => {
           if (server)
             server.emit("end", downstreamReq, downstreamRes, upstreamRes);
         });

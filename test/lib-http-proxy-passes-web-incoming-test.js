@@ -292,8 +292,12 @@ describe('#createProxyServer.web() using own http server', function () {
     var proxy = httpProxy.createProxyServer({
       target: 'http://127.0.0.1:45002',
       handleErrors: true,
+      agent: new http.Agent({ keepAlive: true })
       // timeout: 400
     });
+    proxy.on('error', function(err, req, res) {
+      console.log('error', err);
+    })
     let count = 0;
     let total = 0
     function maybe_done(name) {
@@ -307,14 +311,18 @@ describe('#createProxyServer.web() using own http server', function () {
 
     proxy.on('upstreamReq', function(upstreamReq) {
       total ++
+      // upstreamReq.socket.destroy()
       upstreamReq.on('close', () => {
         maybe_done('upstreamReq close');
       })
-      upstreamReq.emit('error', {code: 'dd'})
+      // upstreamReq.emit('error', {code: 'dd'})
       upstreamReq.on("response", function (upstreamRes) {
-        total ++
+        total += 2
         upstreamRes.on('close', () => {
           maybe_done('upstreamRes close');
+        })
+        upstreamRes.on('end', () => {
+          maybe_done('upstreamRes end');
         })
       });
 
@@ -328,6 +336,10 @@ describe('#createProxyServer.web() using own http server', function () {
       // res.destroy();
       res.write('ok');
     }).listen(45002);
+
+    // setTimeout(() => {
+    //   source.closeAllConnections()
+    // }, 400);
 
  
     source.on('clientError', (err, socket) => {
