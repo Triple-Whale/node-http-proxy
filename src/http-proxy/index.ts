@@ -153,7 +153,6 @@ export class ProxyServer extends EE3 {
         );
       }
 
-      const promises = [];
       for (var i = 0; i < passes.length; i++) {
         /**
          * Call of passes functions
@@ -164,13 +163,11 @@ export class ProxyServer extends EE3 {
          * pass(req, socket, options, head)
          */
         const passRes = passes[i](req, res, requestOptions, head, this, cbl);
-        promises.push(passRes);
         if (passRes) {
           // passes can return a truthy value to halt the loop
           break;
         }
       }
-      return Promise.all(promises);
     };
   }
 }
