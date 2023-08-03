@@ -1,6 +1,6 @@
 {
   "name": "@tw/http-proxy",
-  "version": "1.23.7",
+  "version": "1.24.0",
   "scripts": {
     "dev": "tsc --watch --preserveWatchOutput",
     "build": "npm i && tsc",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@types/follow-redirects": "^1.14.1",
+    "@types/requires-port": "^1.0.0",
     "async": "^3.2.4",
     "auto-changelog": "^2.4.0",
     "concat-stream": "^2.0.0",

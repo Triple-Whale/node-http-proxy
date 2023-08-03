@@ -1,5 +1,5 @@
 import url from "url";
-import required from "requires-port";
+import requiresPort from "requires-port";
 import http, { IncomingMessage } from "http";
 import { proxyOptions } from "..";
 
@@ -74,13 +74,17 @@ export function setupOutgoing(
     outgoing.ca = options.ca;
   }
 
-  if (isSSL.test(options[forward || "target"]?.protocol)) {
+  const protocol = (options[forward || "target"] as url.UrlWithStringQuery)
+    ?.protocol;
+
+  if (isSSL.test(protocol)) {
     // @ts-ignore
     outgoing.rejectUnauthorized =
       typeof options.secure === "undefined" ? true : options.secure;
   }
 
-  outgoing.agent = options.agent || false;
+  outgoing.agent =
+    options[protocol === "http:" ? "httpAgent" : "httpsAgent"] || false;
   outgoing.localAddress = options.localAddress;
 
   //
@@ -118,8 +122,7 @@ export function setupOutgoing(
 
   if (options.changeOrigin) {
     outgoing.headers.host =
-      required(outgoing.port, options[forward || "target"]?.protocol) &&
-      !hasPort(outgoing.host)
+      requiresPort(outgoing.port, protocol) && !hasPort(outgoing.host)
         ? outgoing.host + ":" + outgoing.port
         : outgoing.host;
   }

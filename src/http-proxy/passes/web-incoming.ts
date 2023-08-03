@@ -143,7 +143,9 @@ export default {
     if (options.forward) {
       // If forward enable, so just pipe the request
       var forwardReq = (
-        options.forward.protocol === "https:" ? https : http
+        (options.forward as UrlWithStringQuery).protocol === "https:"
+          ? https
+          : http
       ).request(
         setupOutgoing(requestOptions, options, downstreamReq, "forward")
       );

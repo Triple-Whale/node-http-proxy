@@ -6,11 +6,12 @@ import { Agent } from "http";
 export type proxyOptions = {
   target?: string | UrlWithStringQuery;
   requestOptions?: RequestOptions;
-  forward?: any;
+  forward?: string | UrlWithStringQuery;
   headers?: any;
   proxyTimeout?: number;
   timeout?: number;
-  agent?: Agent;
+  httpAgent?: Agent;
+  httpsAgent?: Agent;
   buffer?: any;
   selfHandleResponse?: boolean;
   ssl?: {

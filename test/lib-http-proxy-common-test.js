@@ -8,7 +8,7 @@ describe('module/http-proxy/common.js', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing,
       {
-        agent     : '?',
+        httpAgent     : '?',
         target: {
           host      : 'hey',
           hostname  : 'how',
@@ -29,7 +29,7 @@ describe('module/http-proxy/common.js', function () {
       expect(outgoing.hostname).to.eql('how');
       expect(outgoing.socketPath).to.eql('are');
       expect(outgoing.port).to.eql('you');
-      expect(outgoing.agent).to.eql('?');
+      expect(outgoing.agent).to.eql(false);
 
       expect(outgoing.method).to.eql('i');
       expect(outgoing.path).to.eql('am');
@@ -45,7 +45,7 @@ describe('module/http-proxy/common.js', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing,
         {
-          agent: undefined,
+          httpAgent: undefined,
           target: {
             host      : 'hey',
             hostname  : 'how',
@@ -66,7 +66,7 @@ describe('module/http-proxy/common.js', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing,
         {
-          agent: undefined,
+          httpAgent: undefined,
           target: {
             host      : 'hey',
             hostname  : 'how',
@@ -88,7 +88,7 @@ describe('module/http-proxy/common.js', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing,
         {
-          agent: undefined,
+          httpAgent: undefined,
           target: {
             host      : 'hey',
             hostname  : 'how',
@@ -109,7 +109,7 @@ describe('module/http-proxy/common.js', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing,
         {
-          agent: undefined,
+          httpAgent: undefined,
           target: {
             host      : 'hey',
             hostname  : 'how',
@@ -126,7 +126,7 @@ describe('module/http-proxy/common.js', function () {
       expect(outgoing.headers.connection).to.eql('close');
     });
 
-    it('should set the agent to false if none is given', function () {
+    it('should set the httpAgent to false if none is given', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing, {target:
         'http://localhost'
@@ -138,7 +138,7 @@ describe('module/http-proxy/common.js', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing,
       {
-        agent   :'?',
+        httpsAgent   :'?',
         target: {
           host      : 'how',
           hostname  : 'are',
@@ -318,7 +318,7 @@ describe('module/http-proxy/common.js', function () {
       var outgoing = {};
       common.setupOutgoing(outgoing,
       {
-        agent     : '?',
+        httpAgent     : '?',
         target: {
           host      : 'how',
           hostname  : 'are',

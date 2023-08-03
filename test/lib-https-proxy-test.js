@@ -195,7 +195,7 @@ describe('lib/http-proxy.js', function() {
         source.listen(ports.source);
 
         var proxy = httpProxy.createProxyServer({
-          agent: new http.Agent({ maxSockets: 2 })
+          httpAgent: new http.Agent({ maxSockets: 2 })
         });
 
         var ownServer = https.createServer({

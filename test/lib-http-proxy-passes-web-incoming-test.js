@@ -292,7 +292,7 @@ describe('#createProxyServer.web() using own http server', function () {
     var proxy = httpProxy.createProxyServer({
       target: 'http://127.0.0.1:45002',
       handleErrors: true,
-      agent: new http.Agent({ keepAlive: true })
+      httpAgent: new http.Agent({ keepAlive: true })
       // timeout: 400
     });
     proxy.on('error', function(err, req, res) {
