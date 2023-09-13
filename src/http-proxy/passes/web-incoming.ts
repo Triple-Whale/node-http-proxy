@@ -118,7 +118,7 @@ export default {
     options: proxyOptions,
     _,
     server,
-    clb
+    errorHandler
   ) {
     // And we begin!
     server.emit(
@@ -211,8 +211,8 @@ export default {
         return upstreamReq.destroy();
       }
 
-      if (clb) {
-        clb(err, downstreamReq, downstreamRes, url);
+      if (errorHandler) {
+        errorHandler(err, downstreamReq, downstreamRes, url);
       } else {
         server.emit("error", err, downstreamReq, downstreamRes, url);
       }

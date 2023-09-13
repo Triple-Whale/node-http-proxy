@@ -1,10 +1,10 @@
 var httpProxy = require('../module'),
-    semver    = require('semver'),
-    expect    = require('expect.js'),
-    http      = require('http')
-    https     = require('https'),
-    path      = require('path'),
-    fs        = require('fs');
+  semver = require('semver'),
+  expect = require('expect.js'),
+  http = require('http')
+https = require('https'),
+  path = require('path'),
+  fs = require('fs');
 
 //
 // Expose a port number generator.
@@ -17,12 +17,12 @@ Object.defineProperty(gen, 'port', {
   }
 });
 
-describe('lib/http-proxy.js', function() {
-  describe('HTTPS #createProxyServer', function() {
+describe('lib/http-proxy.js', function () {
+  describe('HTTPS #createProxyServer', function () {
     describe('HTTPS to HTTP', function () {
       it('should proxy the request en send back the response', function (done) {
         var ports = { source: gen.port, proxy: gen.port };
-        var source = http.createServer(function(req, res) {
+        var source = http.createServer(function (req, res) {
           expect(req.method).to.eql('GET');
           expect(req.headers.host.split(':')[1]).to.eql(ports.proxy);
           res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -46,7 +46,7 @@ describe('lib/http-proxy.js', function() {
           path: '/',
           method: 'GET',
           rejectUnauthorized: false
-        }, function(res) {
+        }, function (res) {
           expect(res.statusCode).to.eql(200);
 
           res.on('data', function (data) {
@@ -87,7 +87,7 @@ describe('lib/http-proxy.js', function() {
           hostname: '127.0.0.1',
           port: ports.proxy,
           method: 'GET'
-        }, function(res) {
+        }, function (res) {
           expect(res.statusCode).to.eql(200);
 
           res.on('data', function (data) {
@@ -109,7 +109,7 @@ describe('lib/http-proxy.js', function() {
           key: fs.readFileSync(path.join(__dirname, 'fixtures', 'agent2-key.pem')),
           cert: fs.readFileSync(path.join(__dirname, 'fixtures', 'agent2-cert.pem')),
           ciphers: 'AES128-GCM-SHA256',
-        }, function(req, res) {
+        }, function (req, res) {
           expect(req.method).to.eql('GET');
           expect(req.headers.host.split(':')[1]).to.eql(ports.proxy);
           res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -134,7 +134,7 @@ describe('lib/http-proxy.js', function() {
           path: '/',
           method: 'GET',
           rejectUnauthorized: false
-        }, function(res) {
+        }, function (res) {
           expect(res.statusCode).to.eql(200);
 
           res.on('data', function (data) {
@@ -185,7 +185,7 @@ describe('lib/http-proxy.js', function() {
     describe('HTTPS to HTTP using own server', function () {
       it('should proxy the request en send back the response', function (done) {
         var ports = { source: gen.port, proxy: gen.port };
-        var source = http.createServer(function(req, res) {
+        var source = http.createServer(function (req, res) {
           expect(req.method).to.eql('GET');
           expect(req.headers.host.split(':')[1]).to.eql(ports.proxy);
           res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -203,8 +203,10 @@ describe('lib/http-proxy.js', function() {
           cert: fs.readFileSync(path.join(__dirname, 'fixtures', 'agent2-cert.pem')),
           ciphers: 'AES128-GCM-SHA256',
         }, function (req, res) {
-          proxy.web(req, res, {
-            target: 'http://127.0.0.1:' + ports.source
+          proxy.web({
+            req, res, options: {
+              target: 'http://127.0.0.1:' + ports.source
+            }
           })
         }).listen(ports.proxy);
 
@@ -214,7 +216,7 @@ describe('lib/http-proxy.js', function() {
           path: '/',
           method: 'GET',
           rejectUnauthorized: false
-        }, function(res) {
+        }, function (res) {
           expect(res.statusCode).to.eql(200);
 
           res.on('data', function (data) {

@@ -5,18 +5,26 @@ import https from "https";
 import webPasses from "./passes/web-incoming";
 import wsPasses from "./passes/ws-incoming";
 import { proxyOptions } from "../index";
+import internal from "stream";
 
-type callProxy = (
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
-  options?: proxyOptions
-) => void;
+type ProxyWeb = (args: {
+  req: http.IncomingMessage;
+  res: http.ServerResponse;
+  options?: proxyOptions;
+}) => void;
+
+type ProxyWs = (args: {
+  req: http.IncomingMessage;
+  socket: internal.Duplex;
+  head: Buffer;
+  options?: proxyOptions;
+}) => void;
 
 export class ProxyServer extends EE3 {
-  web: callProxy;
-  ws: callProxy;
-  proxyRequest: callProxy;
-  proxyWebsocketRequest: callProxy;
+  web: ProxyWeb;
+  ws: ProxyWs;
+  proxyRequest: ProxyWeb;
+  proxyWebsocketRequest: ProxyWs;
   options: proxyOptions;
   webPasses;
   wsPasses;
@@ -45,7 +53,7 @@ export class ProxyServer extends EE3 {
   listen(port: number, hostname: string) {
     const self = this;
     const closure = function (req, res) {
-      self.web(req, res);
+      self.web({ req, res });
     };
 
     this._server = this.options.ssl
@@ -55,7 +63,7 @@ export class ProxyServer extends EE3 {
     if (this.options.ws) {
       this._server.on("upgrade", function (req, socket, head) {
         // @ts-ignore
-        self.ws(req, socket, head);
+        self.ws({ req, socket, head });
       });
     }
 
@@ -110,35 +118,17 @@ export class ProxyServer extends EE3 {
   }
 
   createRightProxy(type: "ws" | "web") {
-    return function processRequest(req, res) {
-      var passes = type === "ws" ? this.wsPasses : this.webPasses,
-        args = [].slice.call(arguments),
-        cntr = args.length - 1,
-        head,
-        cbl;
-
-      /* optional args parse begin */
-      if (typeof args[cntr] === "function") {
-        cbl = args[cntr];
-
-        cntr--;
-      }
-
-      var requestOptions = this.options;
-      if (!(args[cntr] instanceof Buffer) && args[cntr] !== res) {
-        //Copy global options
-        requestOptions = Object.assign({}, this.options);
-        //Overwrite with request options
-        Object.assign(requestOptions, args[cntr]);
-        cntr--;
-      }
-
-      if (args[cntr] instanceof Buffer) {
-        head = args[cntr];
-      }
-
-      /* optional args parse end */
-
+    return function processRequest(args: {
+      req: http.IncomingMessage;
+      res?: http.ServerResponse;
+      socket?: internal.Duplex;
+      head?: Buffer;
+      errorHandler?: Function;
+      options?: proxyOptions;
+    }) {
+      const passes = type === "ws" ? this.wsPasses : this.webPasses;
+      const { req, res, options, head, errorHandler, socket } = args;
+      const requestOptions = { ...this.options, ...options };
       ["target", "forward"].forEach((e) => {
         if (typeof requestOptions[e] === "string")
           requestOptions[e] = url.parse(requestOptions[e]);
@@ -162,7 +152,14 @@ export class ProxyServer extends EE3 {
          * refer to the connection socket
          * pass(req, socket, options, head)
          */
-        const passRes = passes[i](req, res, requestOptions, head, this, cbl);
+        const passRes = passes[i](
+          req,
+          res || socket,
+          requestOptions,
+          head,
+          this,
+          errorHandler
+        );
         if (passRes) {
           // passes can return a truthy value to halt the loop
           break;

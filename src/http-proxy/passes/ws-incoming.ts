@@ -53,7 +53,7 @@ export default {
    * @api private
    */
 
-  XHeaders: function XHeaders(req, socket, options) {
+  XHeaders: function XHeaders(req, _socket, options) {
     if (!options.xfwd) return;
 
     var values = {
@@ -80,7 +80,7 @@ export default {
    *
    * @api private
    */
-  stream: function stream(req, socket, options, head, server, clb) {
+  stream: function stream(req, socket, options, head, server, errorHandler) {
     var createHttpHeader = function (line, headers) {
       return (
         Object.keys(headers)
@@ -177,8 +177,8 @@ export default {
     return upstreamReq.end(); // XXX: CHECK IF THIS IS THIS CORRECT
 
     function onOutgoingError(err) {
-      if (clb) {
-        clb(err, req, socket);
+      if (errorHandler) {
+        errorHandler(err, req, socket);
       } else {
         server.emit("error", err, req, socket);
       }

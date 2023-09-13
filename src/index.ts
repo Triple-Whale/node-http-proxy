@@ -33,7 +33,7 @@ export type proxyOptions = {
   protocolRewrite?: boolean;
   followRedirects?: boolean;
   handleErrors?: boolean;
-  logger?: any;
+  logger?: any; // bunyan
 };
 
 /**
