@@ -278,3 +278,11 @@ export const rewriteCookieProperty = function rewriteCookieProperty(
 function hasPort(host) {
   return !!~host.indexOf(":");
 }
+
+export function isWebsocket(req) {
+  return (
+    req.method === "GET" &&
+    req.headers.upgrade &&
+    req.headers.upgrade.toLowerCase() === "websocket"
+  );
+}

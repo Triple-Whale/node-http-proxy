@@ -1,7 +1,7 @@
 import { ProxyServer } from "./http-proxy/index";
 import { UrlWithStringQuery } from "url";
-import { RequestOptions, ServerResponse } from "http";
-import { Agent } from "http";
+import { Agent, ServerResponse, RequestOptions } from "http";
+import stream from "stream";
 
 export type proxyOptions = {
   target?: string | UrlWithStringQuery;
@@ -83,14 +83,18 @@ export function createProxyServer(options: proxyOptions): ProxyServer {
   if (!options) throw new Error("options are required!");
   const proxy = new ProxyServer(options);
   if (options.handleErrors) {
-    proxy.on("error", (_err, _req, res: ServerResponse) => {
+    proxy.on("error", (_err, _req, res: ServerResponse | stream.Duplex) => {
       if (options.logger) {
         options.logger.error(_err);
       }
-      if (!res.headersSent) {
-        res.writeHead(502, { "content-type": "text/plain" });
-        res.end("Bad Gateway");
-      } else {
+      if (res instanceof ServerResponse) {
+        if (!res.headersSent) {
+          res.writeHead(502, { "content-type": "text/plain" });
+          res.end("Bad Gateway");
+        } else {
+          res.destroy();
+        }
+      } else if (res instanceof stream.Duplex) {
         res.destroy();
       }
     });

@@ -4,9 +4,12 @@ import {
   getPort,
   hasEncryptedConnection,
   isSSL,
+  isWebsocket,
   setupOutgoing,
   setupSocket,
 } from "../common";
+import stream from "stream";
+
 /*!
  * Array of passes.
  *
@@ -32,12 +35,7 @@ export default {
    */
 
   checkMethodAndHeader: function checkMethodAndHeader(req, socket) {
-    if (req.method !== "GET" || !req.headers.upgrade) {
-      socket.destroy();
-      return true;
-    }
-
-    if (req.headers.upgrade.toLowerCase() !== "websocket") {
+    if (!isWebsocket(req)) {
       socket.destroy();
       return true;
     }
@@ -80,23 +78,29 @@ export default {
    *
    * @api private
    */
-  stream: function stream(req, socket, options, head, server, errorHandler) {
+  stream: function stream(
+    req,
+    socket: stream.Duplex,
+    options,
+    head,
+    server,
+    errorHandler
+  ) {
     var createHttpHeader = function (line, headers) {
       return (
         Object.keys(headers)
           .reduce(
-            function (head, key) {
+            function (header, key) {
               var value = headers[key];
-
               if (!Array.isArray(value)) {
-                head.push(key + ": " + value);
-                return head;
+                header.push(key + ": " + value);
+                return header;
               }
 
               for (var i = 0; i < value.length; i++) {
-                head.push(key + ": " + value[i]);
+                header.push(key + ": " + value[i]);
               }
-              return head;
+              return header;
             },
             [line]
           )
@@ -119,22 +123,22 @@ export default {
 
     // Error Handler
     upstreamReq.on("error", onOutgoingError);
-    upstreamReq.on("response", function (res) {
+    upstreamReq.on("response", function (upstreamRes) {
       // if upgrade event isn't going to happen, close the socket
       // @ts-ignore
-      if (!res.upgrade) {
+      if (!upstreamRes.upgrade) {
         socket.write(
           createHttpHeader(
             "HTTP/" +
-              res.httpVersion +
+              upstreamRes.httpVersion +
               " " +
-              res.statusCode +
+              upstreamRes.statusCode +
               " " +
-              res.statusMessage,
-            res.headers
+              upstreamRes.statusMessage,
+            upstreamRes.headers
           )
         );
-        res.pipe(socket);
+        upstreamRes.pipe(socket);
       }
     });
 

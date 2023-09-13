@@ -6,6 +6,7 @@ import webPasses from "./passes/web-incoming";
 import wsPasses from "./passes/ws-incoming";
 import { proxyOptions } from "../index";
 import internal from "stream";
+import { isWebsocket } from "./common";
 
 type ProxyWeb = (args: {
   req: http.IncomingMessage;
@@ -115,6 +116,27 @@ export class ProxyServer extends EE3 {
     if (i === false) throw new Error("No such pass");
 
     passes.splice(i++, 0, callback);
+  }
+
+  all(args: {
+    req: http.IncomingMessage;
+    res: http.ServerResponse;
+    errorHandler?: Function;
+    options?: proxyOptions;
+  }) {
+    const ws = isWebsocket(args.req);
+    if (!ws) {
+      this.web(args);
+    } else {
+      this.ws({
+        req: args.req,
+        socket: args.req.socket,
+        head: Buffer.from(""),
+        ...args,
+        // @ts-ignore
+        res: null,
+      });
+    }
   }
 
   createRightProxy(type: "ws" | "web") {
