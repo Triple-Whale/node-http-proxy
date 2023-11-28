@@ -8,7 +8,7 @@ import {
   setupOutgoing,
   setupSocket,
 } from "../common";
-import stream from "stream";
+import { Socket } from "net";
 
 /*!
  * Array of passes.
@@ -80,7 +80,7 @@ export default {
    */
   stream: function stream(
     req,
-    socket: stream.Duplex,
+    socket: Socket,
     options,
     head,
     server,
@@ -113,6 +113,7 @@ export default {
 
     const requestOptions = {
       ...options.ssl,
+      ...options.requestOptions,
     };
 
     var upstreamReq = (
@@ -120,9 +121,7 @@ export default {
     ).request(setupOutgoing(requestOptions, options, req));
 
     // Enable developers to modify the upstreamReq before headers are sent
-    if (server) {
-      server.emit("proxyReqWs", upstreamReq, req, socket, options, head);
-    }
+    server.emit("proxyReqWs", upstreamReq, req, socket, options, head);
 
     // Error Handler
     upstreamReq.on("error", onOutgoingError);
@@ -145,24 +144,24 @@ export default {
       }
     });
 
-    upstreamReq.on("upgrade", function (upstreamRes, proxySocket, proxyHead) {
-      proxySocket.on("error", onOutgoingError);
+    upstreamReq.on("upgrade", (upstreamRes, upstreamSocket, proxyHead) => {
+      upstreamSocket.on("error", onOutgoingError);
 
       // Allow us to listen when the websocket has completed
-      proxySocket.on("end", function () {
-        server.emit("close", upstreamRes, proxySocket, proxyHead);
+      upstreamSocket.on("end", () => {
+        server.emit("close", upstreamRes, upstreamSocket, proxyHead);
       });
 
-      // The pipe below will end proxySocket if socket closes cleanly, but not
+      // The pipe below will end upstreamSocket if socket closes cleanly, but not
       // if it errors (eg, vanishes from the net and starts returning
       // EHOSTUNREACH). We need to do that explicitly.
-      socket.on("error", function () {
-        proxySocket.end();
+      socket.on("error", () => {
+        upstreamSocket.end();
       });
 
-      setupSocket(proxySocket);
+      setupSocket(upstreamSocket);
 
-      if (proxyHead && proxyHead.length) proxySocket.unshift(proxyHead);
+      if (proxyHead && proxyHead.length) upstreamSocket.unshift(proxyHead);
 
       //
       // Remark: Handle writing the headers to the socket when switching protocols
@@ -175,10 +174,10 @@ export default {
         )
       );
 
-      proxySocket.pipe(socket).pipe(proxySocket);
+      upstreamSocket.pipe(socket).pipe(upstreamSocket);
 
-      server.emit("open", proxySocket);
-      server.emit("proxySocket", proxySocket); //DEPRECATED.
+      server.emit("open", upstreamSocket);
+      server.emit("proxySocket", upstreamSocket); //DEPRECATED.
     });
 
     return upstreamReq.end(); // XXX: CHECK IF THIS IS THIS CORRECT

@@ -1,6 +1,7 @@
 import url from "url";
 import requiresPort from "requires-port";
 import http, { IncomingMessage } from "http";
+import { Socket } from "net";
 import { proxyOptions } from "..";
 
 const upgradeHeader = /(^|,)\s*upgrade\s*($|,)/i;
@@ -146,14 +147,12 @@ export function setupOutgoing(
  * @api private
  */
 
-export const setupSocket = function (socket) {
+export function setupSocket(socket: Socket) {
   socket.setTimeout(0);
   socket.setNoDelay(true);
-
   socket.setKeepAlive(true, 0);
-
   return socket;
-};
+}
 
 /**
  * Get the port number from the host. Or guess it based on the connection type.
