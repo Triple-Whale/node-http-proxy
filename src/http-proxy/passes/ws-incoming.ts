@@ -1,4 +1,4 @@
-import http from "http";
+import http, { IncomingMessage } from "http";
 import https from "https";
 import {
   getPort,
@@ -51,16 +51,16 @@ export default {
    * @api private
    */
 
-  XHeaders: function XHeaders(req, _socket, options) {
+  xHeaders: function xHeaders(req: IncomingMessage, _socket, options) {
     if (!options.xfwd) return;
 
-    var values = {
-      for: req.connection.remoteAddress || req.socket.remoteAddress,
+    const values = {
+      for: req.socket.remoteAddress,
       port: getPort(req),
       proto: hasEncryptedConnection(req) ? "wss" : "ws",
     };
 
-    ["for", "port", "proto"].forEach(function (header) {
+    ["for", "port", "proto"].forEach((header) => {
       req.headers["x-forwarded-" + header] =
         (req.headers["x-forwarded-" + header] || "") +
         (req.headers["x-forwarded-" + header] ? "," : "") +
@@ -86,18 +86,17 @@ export default {
     server,
     errorHandler
   ) {
-    var createHttpHeader = function (line, headers) {
+    function createHttpHeader(line, headers) {
       return (
         Object.keys(headers)
           .reduce(
-            function (header, key) {
-              var value = headers[key];
+            (header, key) => {
+              const value = headers[key];
               if (!Array.isArray(value)) {
                 header.push(key + ": " + value);
                 return header;
               }
-
-              for (var i = 0; i < value.length; i++) {
+              for (let i = 0; i < value.length; i++) {
                 header.push(key + ": " + value[i]);
               }
               return header;
@@ -106,15 +105,19 @@ export default {
           )
           .join("\r\n") + "\r\n\r\n"
       );
-    };
+    }
 
     setupSocket(socket);
 
     if (head && head.length) socket.unshift(head);
 
+    const requestOptions = {
+      ...options.ssl,
+    };
+
     var upstreamReq = (
       isSSL.test(options.target.protocol) ? https : http
-    ).request(setupOutgoing(options.ssl || {}, options, req));
+    ).request(setupOutgoing(requestOptions, options, req));
 
     // Enable developers to modify the upstreamReq before headers are sent
     if (server) {
@@ -123,7 +126,7 @@ export default {
 
     // Error Handler
     upstreamReq.on("error", onOutgoingError);
-    upstreamReq.on("response", function (upstreamRes) {
+    upstreamReq.on("response", (upstreamRes) => {
       // if upgrade event isn't going to happen, close the socket
       // @ts-ignore
       if (!upstreamRes.upgrade) {
@@ -188,6 +191,5 @@ export default {
       }
       socket.end();
     }
-    return upstreamReq;
   },
 };

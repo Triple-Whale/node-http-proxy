@@ -137,7 +137,7 @@ export default {
     const http = agents.http;
     const https = agents.https;
     const requestOptions = {
-      ...(options.ssl || {}),
+      ...options.ssl,
       ...options.requestOptions,
     };
     if (options.forward) {

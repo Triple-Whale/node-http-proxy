@@ -62,6 +62,9 @@ export class ProxyServer extends EE3 {
       : http.createServer(closure);
 
     if (this.options.ws) {
+      // this._server.keepAliveTimeout = 0;
+      // this._server.headersTimeout = 0;
+      // this._server.requestTimeout = 0;
       this._server.on("upgrade", function (req, socket, head) {
         // @ts-ignore
         self.ws({ req, socket, head });
