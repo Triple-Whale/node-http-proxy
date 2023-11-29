@@ -373,16 +373,16 @@ describe('module/http-proxy/common.js', function () {
     it('should setup a socket', function () {
       var socketConfig = {
         timeout: null,
-        nodelay: false,
+        // nodelay: false,
         keepalive: false
       },
       stubSocket = {
         setTimeout: function (num) {
           socketConfig.timeout = num;
         },
-        setNoDelay: function (bol) {
-          socketConfig.nodelay = bol;
-        },
+        // setNoDelay: function (bol) {
+        //   socketConfig.nodelay = bol;
+        // },
         setKeepAlive: function (bol) {
           socketConfig.keepalive = bol;
         }
@@ -390,7 +390,7 @@ describe('module/http-proxy/common.js', function () {
       returnValue = common.setupSocket(stubSocket);
 
       expect(socketConfig.timeout).to.eql(0);
-      expect(socketConfig.nodelay).to.eql(true);
+      // expect(socketConfig.nodelay).to.eql(true);
       expect(socketConfig.keepalive).to.eql(true);
     });
   });

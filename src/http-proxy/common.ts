@@ -149,7 +149,7 @@ export function setupOutgoing(
 
 export function setupSocket(socket: Socket) {
   socket.setTimeout(0);
-  socket.setNoDelay(true);
+  // socket.setNoDelay(true);
   socket.setKeepAlive(true, 0);
   return socket;
 }

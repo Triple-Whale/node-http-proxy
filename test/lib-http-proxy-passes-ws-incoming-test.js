@@ -84,7 +84,7 @@ describe('lib/http-proxy/passes/ws-incoming.js', function () {
 
     it('set the correct x-forwarded-* headers from req.connection', function () {
       var stubRequest = {
-        connection: {
+        socket: {
           remoteAddress: '192.168.1.2',
           remotePort: '8080'
         },

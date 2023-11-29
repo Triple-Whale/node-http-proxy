@@ -51,7 +51,7 @@ export default {
    * @api private
    */
 
-  xHeaders: function xHeaders(req: IncomingMessage, _socket, options) {
+  XHeaders: function xHeaders(req: IncomingMessage, _socket, options) {
     if (!options.xfwd) return;
 
     const values = {
